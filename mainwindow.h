@@ -22,19 +22,23 @@ public slots:
     void ItemEvent();
     void hide();
 public:
-    MainWindow(QWidget *parent = nullptr);
+    //MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr,int mode = 1);
     ~MainWindow();
+    void loadmap();
+    void load();
     void initGame();
     void keyPressEvent(QKeyEvent* event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void fig_op(int f,char op);
     int mode;
     game_model* game;
-    QLabel* label[MAX_COL*MAX_ROW];
+    QLabel* label[Map_Col*Map_Row];
     QLabel* figure1;
     QLabel* figure2;
     QTimer* GameTimer;
     QTimer* ItemTimer;
-    void paintline();
+    QFile save_file;
 
 private:
     bool pause;
@@ -44,5 +48,8 @@ protected:
 private slots:
     void on_pause_clicked();
     void on_save_clicked();
+    void on_exit_clicked();
+signals:
+    void ExitWin();
 };
 #endif // MAINWINDOW_H

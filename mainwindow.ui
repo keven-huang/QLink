@@ -14,11 +14,11 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="Point1">
+   <widget class="QLabel" name="Point_1">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>590</y>
+      <x>700</x>
+      <y>580</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -59,16 +59,35 @@
       </widget>
      </item>
      <item>
-      <widget class="QProgressBar" name="Timebar">
-       <property name="value">
-        <number>24</number>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-      </widget>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QLCDNumber" name="Timer"/>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="Point_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>590</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Points:</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

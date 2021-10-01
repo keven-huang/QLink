@@ -19,15 +19,18 @@ SOURCES += \
     figure.cpp \
     game_model.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    menu.cpp
 
 HEADERS += \
     figure.h \
     game_model.h \
-    mainwindow.h
+    mainwindow.h \
+    menu.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    menu.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
