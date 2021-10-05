@@ -6,5 +6,8 @@
 画方框
 透明度
 5.人物
-6.shuffle后
-6.fig1和fig2同时连接时两个都出现/ hide在双人模式下会提前
+6.shuffle后似乎有些bug
+7.fig1和fig2同时连接时两个都出现/ hide在双人模式下会提前
+QPainter::begin: Paint device returned engine == 0, type: 2
+QPainter::setCompositionMode: Painter not active
+QPainter::end: Painter not active, aborted

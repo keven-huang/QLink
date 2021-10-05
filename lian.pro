@@ -1,9 +1,11 @@
 QT       += core gui
-
+QT       += testlib
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
-
+TEMPLATE = app
+CONFIG += qt console warn_on depend_includepath testcase
+CONFIG -= app_bundle
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -17,16 +19,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     figure.cpp \
-    game_model.cpp \
+    linktest.cpp \
     main.cpp \
     mainwindow.cpp \
-    menu.cpp
+    menu.cpp \
+    qlink.cpp
 
 HEADERS += \
     figure.h \
-    game_model.h \
+    linktest.h \
     mainwindow.h \
-    menu.h
+    menu.h \
+    qlink.h
 
 FORMS += \
     mainwindow.ui \

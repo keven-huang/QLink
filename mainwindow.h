@@ -1,6 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include"game_model.h"
+#include"qlink.h"
 #include <QMainWindow>
 #include<QLabel>
 #include<QPainter>
@@ -9,6 +9,16 @@
 #include<QTimer>
 #include<QProgressBar>
 #include<QFile>
+
+/* 游戏模块类
+ * 初始化共做5件事情
+ * 1.初始化activated block
+ * 2.将激活状态设置为false
+ * 3.将激活方块数组初始化
+ * 4.将绘图用点集合初始化
+ * 5.将Point初始化为0
+ */
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -18,11 +28,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public slots:
-    void timerevent();
+    void TimerEvent();
     void ItemEvent();
     void hide();
 public:
-    //MainWindow(QWidget *parent = nullptr);
     MainWindow(QWidget *parent = nullptr,int mode = 1);
     ~MainWindow();
     void loadmap();
@@ -32,8 +41,8 @@ public:
     void mousePressEvent(QMouseEvent *event) override;
     void fig_op(int f,char op);
     int mode;
-    game_model* game;
-    QLabel* label[Map_Col*Map_Row];
+    QLink* game;
+    QLabel* label[MapCol*MapRow];
     QLabel* figure1;
     QLabel* figure2;
     QTimer* GameTimer;
@@ -50,6 +59,7 @@ private slots:
     void on_save_clicked();
     void on_exit_clicked();
 signals:
+    //退出时释放信号，重新显示Menu
     void ExitWin();
 };
 #endif // MAINWINDOW_H
