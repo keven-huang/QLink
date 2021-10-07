@@ -2,14 +2,16 @@
 #include<ctime>
 #include<cstdlib>
 #include <algorithm>
+#include<QDebug>
+#include<QFile>
 QLink::QLink():fig1(0,0),fig2(0,0)
 {
-    startGame(1);
+    initQLink(1);
 }
 
 QLink::QLink(int mode):fig1(0,0),fig2(0,0)
 {
-    startGame(mode);
+    initQLink(mode);
 }
 
 QLink::~QLink()
@@ -17,7 +19,9 @@ QLink::~QLink()
     delete[] gamemap ;
 }
 
-void QLink::startGame()
+//initQLink()
+//初始化游戏地图以及道具
+void QLink::initQLink()
 {
     gamemap = new int [MapCol*MapRow];
     for(int i = 0;i<MapCol*MapRow;i++)
@@ -34,11 +38,17 @@ void QLink::startGame()
     }
     srand((unsigned)time(0));
     std::random_shuffle(gamemap,gamemap+MapCol*MapRow);
-    flash_item = Time_item = Shuffle_item = dizzy_item = false;
+    visited = new int [(MapCol+2)*(MapRow+2)];
+    for(int i = 0;i<(MapCol+2)*(MapRow+2);i++)
+        visited[i] = 0;
+    flash_item = Time_item = Shuffle_item = false;
 }
-void QLink::startGame(int mode)
+
+//mode 模式 : 1 单人模式 2 双人模式
+//调用initQLink并初始化人物位置
+void QLink::initQLink(int mode)
 {
-    startGame();
+    initQLink();
     if(mode == 1){
         //单人模式在右下角放置模型
         fig1.Posx = MapRow;
@@ -61,6 +71,9 @@ int *QLink::Get_gamemap()
     return gamemap;
 }
 
+//fig_TwoCanLink函数要求src的x,y坐标以及dst的x,y坐标和人物
+//调用private函数来判断两箱子是否能够相连
+//若能相连，会把Point放入该人物的blocks中来方便画线
 bool QLink::fig_TwoCanLink(int srcX, int srcY, int dstX, int dstY,figure &fig)
 {
     fig.blocks.clear();
@@ -78,7 +91,8 @@ bool QLink::fig_TwoCanLink(int srcX, int srcY, int dstX, int dstY,figure &fig)
     fig.blocks.clear();
     return false;
 }
-
+//判断地图中箱子是否完全消去
+//返回胜利或不胜利
 bool QLink::isWin()
 {
     for(int i = 0;i<MapCol*MapRow;i++){
@@ -87,26 +101,101 @@ bool QLink::isWin()
     }
     return true;
 }
-
+//判断当前地图中是否还有解
 bool QLink::StillCanLink()
 {
     solution.clear();
-    for(int i = 0;i<MapCol;i++){
-        int j = 0;
-        if(gamemap[i]>=1&&gamemap[i]<=IconNum){
-            Point p(i,j);
-            solution.push_back(p);
+    for(int i = 0;i<(MapCol+2)*(MapRow+2);i++)
+        if(visited[i]!=0)
+            visited[i]=0;
+    std::queue<Point> q;
+    Point p1(fig1.Posx,fig1.Posy);
+    visited[(fig1.Posx+1)*MapCol+fig1.Posy+1] = 1;
+    q.push(p1);
+    while (!q.empty()) {
+        Point p = q.front();
+        q.pop();
+        //上
+        if(p.x!=-1){
+            if(!visited[(p.x)*MapCol+p.y+1]){
+                if(p.y==-1||p.y==MapCol||p.x==0)
+                    q.push(Point(p.x-1,p.y));
+                else {
+                    if(gamemap[(p.x-1)*MapCol+p.y]>=1&&gamemap[(p.x-1)*MapCol+p.y]<=IconSize)
+                        solution.push_back(Point(p.x-1,p.y));
+                    else
+                        q.push(Point(p.x-1,p.y));
+                }
+                visited[(p.x)*MapCol+p.y+1] = 1;
+            }
         }
+        //下
+        if(p.x!=MapRow){
+            if(!visited[(p.x+2)*MapCol+p.y+1]){
+                if(p.y==-1||p.y==MapCol||p.x==MapRow-1)
+                    q.push(Point(p.x+1,p.y));
+                else {
+                    if(gamemap[(p.x+1)*MapCol+p.y]>=1&&gamemap[(p.x+1)*MapCol+p.y]<=IconSize)
+                        solution.push_back(Point(p.x+1,p.y));
+                    else
+                        q.push(Point(p.x+1,p.y));
+                }
+                visited[(p.x+2)*MapCol+p.y+1] = 1;
+            }
+        }
+        //左
+        if(p.y!=-1){
+            if(!visited[(p.x+1)*MapCol+p.y]){
+                if(p.x==-1||p.x==MapRow||p.y==0)
+                    q.push(Point(p.x,p.y-1));
+                else {
+                    if(gamemap[(p.x)*MapCol+p.y-1]>=1&&gamemap[(p.x)*MapCol+p.y-1]<=IconSize)
+                        solution.push_back(Point(p.x,p.y-1));
+                    else
+                        q.push(Point(p.x,p.y-1));
+                }
+                visited[(p.x+1)*MapCol+p.y] = 1;
+            }
+        }
+        //右
+        if(p.y!=MapCol){
+            if(!visited[(p.x+1)*MapCol+p.y+2]){
+                if(p.x==-1||p.x==MapRow||p.y==MapCol-1)
+                    q.push(Point(p.x,p.y+1));
+                else {
+                    if(gamemap[(p.x)*MapCol+p.y+1]>=1&&gamemap[(p.x)*MapCol+p.y+1]<=IconSize)
+                        solution.push_back(Point(p.x,p.y+1));
+                    else
+                        q.push(Point(p.x,p.y+1));
+                }
+                visited[(p.x+1)*MapCol+p.y+2] = 1;
+            }
+        }
+
+    }
+    QFile file("debug.txt");
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream out(&file);
+    for(int i=0;i<(MapRow+2);i++){
+        for(int j = 0;j<MapCol+2;j++)
+            out<<visited[i*(MapCol)+j]<<" ";
+        out<<"\n";
     }
     for(int i = 0;i<int(solution.size());i++){
-        for(int j = i;j<int(solution.size());j++)
-            //if((solution[i].x!=solution[j].x||solution[i].y!=solution[j].y)
-            //&&Two_Line(solution[i].x,solution[i].y,solution[j].x,solution[j].y)){
+        for(int j = i+1;j<int(solution.size());j++)
+            if((solution[i].x!=solution[j].x||solution[i].y!=solution[j].y)
+                    &&gamemap[solution[i].x*MapCol+solution[i].y]==gamemap[solution[j].x*MapCol+solution[j].y]
+            &&fig_TwoCanLink(solution[i].x,solution[i].y,solution[j].x,solution[j].y,fig_tmp)){
+                fig_tmp.blocks.clear();
+                qDebug()<<solution[i].x<<solution[i].y<<gamemap[solution[i].x*MapCol+solution[i].y];
+                qDebug()<<solution[j].x<<solution[j].y<<gamemap[solution[j].x*MapCol+solution[j].y];
                 return true;
             }
+    }
     return false;
 }
-
+//使用方式 shuffle()
+//随机打乱地图中所有箱子以及道具的顺序
 void QLink::shuffle()
 {
     std::random_shuffle(gamemap,gamemap+MapCol*MapRow);
@@ -171,19 +260,28 @@ void QLink::fig_W(figure &fig)
        }
     }
     // 道具情况
+    //shuffle
     else if(fig.Posx>0&&gamemap[(fig.Posx-1)*MapCol+fig.Posy]==200){
         Shuffle_item = true;
         gamemap[(fig.Posx-1)*MapCol+fig.Posy] = 0;
         shuffle();
         return;
     }
+    //flash
     else if(fig.Posx>0&&gamemap[(fig.Posx-1)*MapCol+fig.Posy]==100){
         flash_item = true;
         gamemap[(fig.Posx-1)*MapCol+fig.Posy] = 0;
         return;
     }
+    //Time
     else if(fig.Posx>0&&gamemap[(fig.Posx-1)*MapCol+fig.Posy]==150){
         Time_item = true;
+        gamemap[(fig.Posx-1)*MapCol+fig.Posy] = 0;
+        return;
+    }
+    //dizzy
+    else if(fig.Posx>0&&gamemap[(fig.Posx-1)*MapCol+fig.Posy]==250){
+        fig.dizzy_item = true;
         gamemap[(fig.Posx-1)*MapCol+fig.Posy] = 0;
         return;
     }
@@ -253,6 +351,11 @@ void QLink::fig_A(figure &fig)
         gamemap[(fig.Posx)*MapCol+fig.Posy-1] = 0;
         return;
     }
+    else if(fig.Posy>0&&gamemap[(fig.Posx)*MapCol+fig.Posy-1]==250){
+        fig.dizzy_item = true;
+        gamemap[(fig.Posx)*MapCol+fig.Posy-1] = 0;
+        return;
+    }
 }
 
 void QLink::fig_S(figure &fig)
@@ -305,20 +408,23 @@ void QLink::fig_S(figure &fig)
     }
     // 道具情况
     else if(fig.Posx<MapRow-1&&gamemap[(fig.Posx+1)*MapCol+fig.Posy]==200){
-        flash_item = true;
+        Shuffle_item = true;
         gamemap[(fig.Posx+1)*MapCol+fig.Posy] = 0;
         shuffle();
         return;
     }
     else if(fig.Posx<MapRow-1&&gamemap[(fig.Posx+1)*MapCol+fig.Posy]==100){
         flash_item = true;
-        //fig1.Posx = fig1.Posx + 1;
         gamemap[(fig.Posx+1)*MapCol+fig.Posy] = 0;
         return;
     }
     else if(fig.Posx<MapRow-1&&gamemap[(fig.Posx+1)*MapCol+fig.Posy]==150){
         Time_item = true;
-        //fig1.Posx = fig1.Posx + 1;
+        gamemap[(fig.Posx+1)*MapCol+fig.Posy] = 0;
+        return;
+    }
+    else if(fig.Posx<MapRow-1&&gamemap[(fig.Posx+1)*MapCol+fig.Posy]==250){
+        fig.dizzy_item = true;
         gamemap[(fig.Posx+1)*MapCol+fig.Posy] = 0;
         return;
     }
@@ -388,15 +494,16 @@ void QLink::fig_D(figure &fig)
         gamemap[(fig.Posx)*MapCol+fig.Posy+1] = 0;
         return;
     }
-    else{
-        fig.Posy = fig.Posy+1;
+    else if(fig.Posy<MapCol -1&&gamemap[(fig.Posx)*MapCol+fig.Posy+1]==250){
+        fig.dizzy_item = true;
+        gamemap[(fig.Posx)*MapCol+fig.Posy+1] = 0;
+        return;
     }
-
 }
 
 bool QLink::One_Line(int srcX, int srcY, int dstX, int dstY,figure &fig)
 {
-    //一横线
+    //横线
     if(srcX == dstX){
         if(srcY>dstY)
             std::swap(srcY,dstY);
@@ -409,7 +516,7 @@ bool QLink::One_Line(int srcX, int srcY, int dstX, int dstY,figure &fig)
         fig.blocks.push_back(p2);
         return true;
     }
-
+    //竖线
     if(srcY==dstY){
         if(srcX>dstX)
             std::swap(srcX,dstX);
@@ -432,7 +539,7 @@ bool QLink::Two_Line(int srcX, int srcY, int dstX, int dstY,figure &fig)
         std::swap(srcY,dstY);
     }
     if(srcX>dstX){
-        if(gamemap[dstX*MapCol+srcY]==0){
+        if(!(gamemap[dstX*MapCol+srcY]>=1&&gamemap[dstX*MapCol+srcY]<=IconNum)){
             if(One_Line(srcX,srcY,dstX,srcY,fig)&&One_Line(dstX,srcY,dstX,dstY,fig)){
                 fig.blocks.clear();
                 Point p1(srcX,srcY),p2(dstX,dstY),p3(dstX,srcY);
@@ -442,7 +549,7 @@ bool QLink::Two_Line(int srcX, int srcY, int dstX, int dstY,figure &fig)
             return true;
             }
         }
-        if(gamemap[srcX*MapCol+dstY]==0){
+        if(!(gamemap[srcX*MapCol+dstY]>=1&&gamemap[srcX*MapCol+dstY]<=IconNum)){
             if(One_Line(srcX,srcY,srcX,dstY,fig)&&One_Line(srcX,dstY,dstX,dstY,fig)){
                 fig.blocks.clear();
                 Point p1(srcX,srcY),p2(dstX,dstY),p3(srcX,dstY);
@@ -452,8 +559,6 @@ bool QLink::Two_Line(int srcX, int srcY, int dstX, int dstY,figure &fig)
                 return true;
             }
         }
-
-
     }
     else {
         if(gamemap[srcX*MapCol+dstY]==0){

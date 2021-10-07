@@ -10,13 +10,15 @@
 #include<QProgressBar>
 #include<QFile>
 
-/* 游戏模块类
- * 初始化共做5件事情
- * 1.初始化activated block
- * 2.将激活状态设置为false
- * 3.将激活方块数组初始化
- * 4.将绘图用点集合初始化
- * 5.将Point初始化为0
+const int Left = 100;
+const int Top = 100;
+const int ItemTime=10000;
+const int DizTime=1000;
+const int PlayTime = 300;
+/* MainWindow
+ * initQlink()初始化Qlink中设定
+ * private slots分别是保存，暂停，退出的槽函数
+ * public slots分别是计时器，道具出现，眩晕函数
  */
 
 QT_BEGIN_NAMESPACE
@@ -30,23 +32,28 @@ class MainWindow : public QMainWindow
 public slots:
     void TimerEvent();
     void ItemEvent();
+    void DizEvent1();
+    void DizEvent2();
     void hide();
 public:
     MainWindow(QWidget *parent = nullptr,int mode = 1);
     ~MainWindow();
-    void loadmap();
-    void load();
-    void initGame();
-    void keyPressEvent(QKeyEvent* event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void fig_op(int f,char op);
     int mode;
+
+    void load();
+    void loadmap();
+    void initQlink();
+
+    void fig_op(int f,char op);
     QLink* game;
     QLabel* label[MapCol*MapRow];
     QLabel* figure1;
     QLabel* figure2;
     QTimer* GameTimer;
     QTimer* ItemTimer;
+    bool dizTime1,dizTime2;
+    QTimer* dizTimer1;
+    QTimer* dizTimer2;
     QFile save_file;
 
 private:
@@ -54,6 +61,8 @@ private:
     Ui::MainWindow *ui;
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 private slots:
     void on_pause_clicked();
     void on_save_clicked();

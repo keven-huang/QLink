@@ -5,9 +5,7 @@
         <file>res/image/150.jfif</file>
         <file>res/image/200.jfif</file>
         <file>res/image/250.jfif</file>
-        <file>res/image/300.jfif</file>
         <file>res/image/fig1.gif</file>
-        <file>res/image/1.jfif</file>
         <file>res/image/2.jfif</file>
         <file>res/image/3.jfif</file>
         <file>res/image/4.jfif</file>
@@ -23,5 +21,6 @@
         <file>res/image/14.jfif</file>
         <file>res/image/15.jfif</file>
         <file>res/image/16.jfif</file>
+        <file>res/image/1.jfif</file>
     </qresource>
 </RCC>

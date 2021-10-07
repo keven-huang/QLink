@@ -29,6 +29,7 @@ public:
     //人物获得分数
     int Score;
     //人物是否激活以及激活方块坐标
+    bool dizzy_item;
     bool activated;
     int activated_block[2];
 

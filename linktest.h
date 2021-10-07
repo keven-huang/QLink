@@ -9,7 +9,6 @@ public:
     LinkTest();
     QLink* Test_game;
 private slots:
-    void initTestCase();
     void One_Link_Test();
     void Two_Link_Test();
     void Three_Link_Test_border();
