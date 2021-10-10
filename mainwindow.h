@@ -10,11 +10,20 @@
 #include<QProgressBar>
 #include<QFile>
 
+/* 常量解释
+ * Left 地图对窗口左边距离
+ * Top 地图对窗口顶部距离
+ * ItemTime 道具出现间隔
+ * DizTime 眩晕时常
+ * PlayTime 游戏总时长
+ */
+
 const int Left = 100;
 const int Top = 100;
-const int ItemTime=10000;
-const int DizTime=1000;
-const int PlayTime = 300;
+const int ItemTime = 10000;
+const int DizTime = 1000;
+const int PlayTime = 30;
+
 /* MainWindow
  * initQlink()初始化Qlink中设定
  * private slots分别是保存，暂停，退出的槽函数
@@ -35,11 +44,12 @@ public slots:
     void DizEvent1();
     void DizEvent2();
     void hide();
+    void hint();
 public:
     MainWindow(QWidget *parent = nullptr,int mode = 1);
     ~MainWindow();
     int mode;
-
+    void HasSolution();
     void load();
     void loadmap();
     void initQlink();
@@ -49,6 +59,7 @@ public:
     QLabel* label[MapCol*MapRow];
     QLabel* figure1;
     QLabel* figure2;
+
     QTimer* GameTimer;
     QTimer* ItemTimer;
     bool dizTime1,dizTime2;

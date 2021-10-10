@@ -26,6 +26,12 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QPushButton" name="single_btn">
+       <property name="font">
+        <font>
+         <family>黑体</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>单人游戏</string>
        </property>
@@ -33,6 +39,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="double_btn">
+       <property name="font">
+        <font>
+         <family>黑体</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>双人游戏</string>
        </property>
@@ -40,6 +52,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="contiue_btn">
+       <property name="font">
+        <font>
+         <family>黑体</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>继续游戏</string>
        </property>
@@ -47,12 +65,40 @@
      </item>
      <item>
       <widget class="QPushButton" name="exit_btn">
+       <property name="font">
+        <font>
+         <family>黑体</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>退出</string>
        </property>
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>40</y>
+      <width>171</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>华文新魏</family>
+      <pointsize>36</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>连连看</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

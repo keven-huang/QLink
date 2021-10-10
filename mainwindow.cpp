@@ -5,14 +5,13 @@
 #include<QPalette>
 #include<QMovie>
 
-
-
 MainWindow::MainWindow(QWidget *parent, int m)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->resize(1100,650);
+    this->setPalette(QColor(255,255,255));
     mode = m;
     initQlink();
 }
@@ -30,6 +29,18 @@ MainWindow::~MainWindow()
     delete GameTimer;
     delete ui;
 }
+//判断整个模型是否有解，若无解，则提示shuffle
+void MainWindow::HasSolution()
+{
+    if(!game->StillCanLink()){
+        int ret = QMessageBox::information(this, "QLink", "no linkable block,shuffle?",QMessageBox::Yes,QMessageBox::No);
+        if(ret==QMessageBox::Yes){
+            game->shuffle();
+            load();
+            HasSolution();
+        }
+    }
+}
 //创建子窗口时调用，人物模型以及箱子图片加载
 void MainWindow::loadmap()
 {
@@ -38,8 +49,8 @@ void MainWindow::loadmap()
             label[i] = new QLabel(this);
             label[i]->setGeometry(Left + (i % MapCol) * IconSize, Top + (i / MapCol) * IconSize, IconSize, IconSize);
             label[i]->show();
-            QString Icon_name=QString("://res\\image/%1.jfif").arg(game->Get_gamemap()[i]);
-            if(game->Get_gamemap()[i]){
+            QString Icon_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[i]);
+            if(game->GetMap()[i]){
                 label[i]->setPixmap(QPixmap(Icon_name));
                 label[i]->setScaledContents(true);
             }else
@@ -56,7 +67,7 @@ void MainWindow::loadmap()
         if(mode==2){
             figure2 = new QLabel(this);
             figure2->setGeometry(Left + game->fig2.Posy * IconSize, Top + game->fig2.Posx * IconSize, IconSize, IconSize);
-            QMovie *fig2 = new QMovie("://res\\image/fig1.gif");
+            QMovie *fig2 = new QMovie("://res\\image/fig2.gif");
             fig2->start();
             figure2->setMovie(fig2);
             figure2->setScaledContents(true);
@@ -75,15 +86,14 @@ void MainWindow::loadmap()
  */
 void MainWindow::load()
 {
-    qDebug()<<"shuffle";
     for(int i = 0;i<MapCol*MapRow;i++)
         label[i]->hide();
     if(game){
         for(int i = 0;i<MapCol*MapRow;i++){
             label[i]->setGeometry(Left + (i % MapCol) * IconSize, Top + (i / MapCol) * IconSize, IconSize, IconSize);
             label[i]->show();
-            QString Icon_name=QString("://res\\image/%1.jfif").arg(game->Get_gamemap()[i]);
-            if(game->Get_gamemap()[i]){
+            QString Icon_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[i]);
+            if(game->GetMap()[i]){
                 label[i]->setPixmap(QPixmap(Icon_name));
                 label[i]->setScaledContents(true);
             }else
@@ -91,7 +101,7 @@ void MainWindow::load()
         }
         figure1->setGeometry(Left + game->fig1.Posy * IconSize, Top + game->fig1.Posx * IconSize, IconSize, IconSize);
         if(mode==2)
-            figure2->setGeometry(Left + game->fig1.Posy * IconSize, Top + game->fig1.Posx * IconSize, IconSize, IconSize);
+            figure2->setGeometry(Left + game->fig2.Posy * IconSize, Top + game->fig2.Posx * IconSize, IconSize, IconSize);
     }
 }
 
@@ -104,7 +114,7 @@ void MainWindow::load()
 void MainWindow::initQlink()
 {
     pause = false;
-    if(mode==1||mode==2){
+    if(mode == 1||mode == 2){
         game = new QLink(mode);
         loadmap();
         //倒计时
@@ -118,7 +128,7 @@ void MainWindow::initQlink()
         ItemTimer = new QTimer(this);
         connect(ItemTimer,SIGNAL(timeout()),this,SLOT(ItemEvent()));
         ItemTimer->start(ItemTime);
-        if(mode==2){
+        if(mode == 2){
             dizTimer1 = new QTimer(this);
             dizTime1 = false;
             dizTimer2 = new QTimer(this);
@@ -127,20 +137,20 @@ void MainWindow::initQlink()
             connect(dizTimer1,SIGNAL(timeout()),this,SLOT(DizEvent2()));
         }
     }
-    else if(mode==3){
+    else if(mode == 3){
         game = new QLink;
         QFile file("save.txt");
         file.open(QIODevice::ReadOnly);
         QTextStream in(&file);
         in>>mode;
         for(int i = 0;i<MapCol*MapRow;i++){
-            in>>game->Get_gamemap()[i];
+            in>>game->GetMap()[i];
         }
         int remain_time;
         in>>remain_time;
         in>>game->fig1.Posx;
         in>>game->fig1.Posy;
-        if(mode==2){
+        if(mode == 2){
             in>>game->fig2.Posx;
             in>>game->fig2.Posy;
         }
@@ -154,13 +164,7 @@ void MainWindow::initQlink()
         ItemTimer->start(ItemTime);
     }
     //初始化游戏时无解
-    if(!game->StillCanLink()){
-        int ret = QMessageBox::information(this, "QLink", "no linkable block,shuffle?",QMessageBox::Yes,QMessageBox::No);
-        if(ret==QMessageBox::Yes){
-            game->shuffle();
-            load();
-        }
-    }
+    HasSolution();
 }
 
 //按键函数
@@ -199,14 +203,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         }
         break;
     case Qt::Key_K:
-        if(mode!=2)
+        if(mode != 2)
             break;
         else{
             fig_op(2,'S');
         }
         break;
     case Qt::Key_L:
-        if(mode!=2)
+        if(mode != 2)
             break;
         else{
             fig_op(2,'D');
@@ -220,7 +224,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     //flash
     if(game->flash_item){
-        if(event->button()==Qt::LeftButton){
+        if(event->button() == Qt::LeftButton){
             qDebug()<<event->pos().x()<<event->pos().y();
             if(event->pos().x()<Left-IconSize||event->pos().x()>Left+(MapCol+1)*IconSize)
                 return;
@@ -234,7 +238,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
                 if(event->pos().y()>Top-IconSize&&event->pos().y()<Top){
                     game->fig1.Posx = -1;
                     game->fig1.Posy = int((event->pos().x()-Left)/IconSize+0.5);
-                    qDebug()<<"posy"<<game->fig1.Posy;
                     figure1->setGeometry(Left + game->fig1.Posy * IconSize, Top + game->fig1.Posx * IconSize, IconSize, IconSize);
                     game->flash_item = false;
                  }
@@ -256,7 +259,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
                     figure1->setGeometry(Left + game->fig1.Posy * IconSize, Top + game->fig1.Posx * IconSize, IconSize, IconSize);
                     game->flash_item = false;
                 }
-                else if(game->Get_gamemap()[x*MapCol+y]==0){
+                else if(game->GetMap()[x*MapCol+y] == 0){
                     game->fig1.Posx = int((event->pos().y()-Top)/IconSize+0.5);
                     game->fig1.Posy = int((event->pos().x()-Left)/IconSize+0.5);
                     figure1->setGeometry(Left + game->fig1.Posy * IconSize, Top + game->fig1.Posx * IconSize, IconSize, IconSize);
@@ -371,28 +374,18 @@ void MainWindow::fig_op(int f,char op)
         game->fig1.activated_block[0]=game->fig1.activated_block[1]=-1;
         if(mode==2)
             game->fig2.activated_block[0]=game->fig2.activated_block[1]=-1;
-        if(!game->StillCanLink()){
-            int ret = QMessageBox::information(this, "QLink", "no linkable block,shuffle?",QMessageBox::Yes,QMessageBox::No);
-            if(ret==QMessageBox::Yes){
-                game->shuffle();
-                load();
-            }
-        }
+        HasSolution();
+    }
+    if(game->hint_item){
+        update();
+        QTimer::singleShot(300,this,SLOT(hint()));
     }
     if(mode==1){
         if(!game->fig1.blocks.empty()){
-            qDebug()<<"second"<<game->fig1.blocks.size();
             update();
             QTimer::singleShot(300, this, SLOT(hide()));
             QString str = "Points:"+QString::number(game->fig1.Score);
             ui->Point_1->setText(str);
-            if(!game->StillCanLink()){
-                int ret = QMessageBox::information(this, "QLink", "no linkable block,shuffle?",QMessageBox::Yes,QMessageBox::No);
-                if(ret==QMessageBox::Yes){
-                    game->shuffle();
-                    load();
-                }
-            }
             if(game->isWin()){
                 ItemTimer->stop();
                 GameTimer->stop();
@@ -415,10 +408,12 @@ void MainWindow::fig_op(int f,char op)
                     close();
                 }
             }
+            if(!game->isWin())
+                HasSolution();
         }
         else{
             for(int i=0;i<MapCol*MapRow;i++)
-                if(game->Get_gamemap()[i]==0)
+                if(game->GetMap()[i]==0)
                     label[i]->hide();
         }
     }
@@ -432,17 +427,16 @@ void MainWindow::fig_op(int f,char op)
             QString str2 = "Player 2 Points:"+QString::number(game->fig2.Score);
             ui->Point_2->setText(str2);
             qDebug()<<game->fig2.Score;
-            if(!game->StillCanLink()){
-                int ret = QMessageBox::information(this, "QLink", "no linkable block,shuffle?",QMessageBox::Yes,QMessageBox::No);
-                if(ret==QMessageBox::Yes){
-                    game->shuffle();
-                    load();
-                }
-            }
             if(game->isWin()){
                 ItemTimer->stop();
                 GameTimer->stop();
-                int ret = QMessageBox::information(this, "QLink", "win!",QMessageBox::Retry,QMessageBox::Close);
+                int ret;
+                if(game->fig1.Score > game->fig2.Score)
+                    ret = QMessageBox::information(this, "QLink", "Player 1 win!",QMessageBox::Retry,QMessageBox::Close);
+                else if(game->fig1.Score < game->fig2.Score)
+                    ret = QMessageBox::information(this, "QLink", "Player 2 win!",QMessageBox::Retry,QMessageBox::Close);
+                else
+                    ret = QMessageBox::information(this, "QLink", "draw!",QMessageBox::Retry,QMessageBox::Close);
                 if(ret==QMessageBox::Retry){
                     delete game;
                     game = new QLink(mode);
@@ -455,25 +449,31 @@ void MainWindow::fig_op(int f,char op)
                     close();
                 }
             }
+            if(!game->isWin())
+                HasSolution();
         }
         else if(game->fig1.blocks.empty()&&game->fig2.blocks.empty()){
             for(int i=0;i<MapCol*MapRow;i++)
-                if(game->Get_gamemap()[i]==0)
+                if(game->GetMap()[i]==0)
                     label[i]->hide();
         }
     }
 }
 
 
-//消除方块
+//消除箱子
 void MainWindow::hide()
 {
     for(int i=0;i<MapCol*MapRow;i++)
-        if(game->Get_gamemap()[i]==0)
+        if(game->GetMap()[i]==0)
             label[i]->hide();
-    qDebug()<<"hide";
     update();
+}
 
+void MainWindow::hint()
+{
+    game->hint_item = false;
+    update();
 }
 
 //用来更新倒计时，倒计时完成，则显示游戏结束
@@ -521,19 +521,19 @@ void MainWindow::ItemEvent()
 {
     int Item;
     if(mode==1)
-        Item = (rand()%3 +2)*50;
+        Item = (rand()%4 + 1)*50;
     else {
-        Item = (rand()%3+3)*50;
+        Item = (rand()%3 + 2)*50;
     }
     QString Item_name=QString("://res\\image/%1.jfif").arg(Item);
     bool has_space=false;
     for(int i = 0;i<MapCol*MapRow;i++)
-        if(game->Get_gamemap()[i]==0)
+        if(game->GetMap()[i]==0)
             has_space  =true;
     while (has_space) {
         int pos = rand()%(MapCol*MapRow);
-        if(game->Get_gamemap()[pos]==0){
-            game->Get_gamemap()[pos]= Item;
+        if(game->GetMap()[pos]==0){
+            game->GetMap()[pos]= Item;
             label[pos]->show();
             label[pos]->setPixmap(QPixmap(Item_name));
             label[pos]->setScaledContents(true);
@@ -548,6 +548,7 @@ void MainWindow::ItemEvent()
 //角色1眩晕函数
 void MainWindow::DizEvent1()
 {
+    qDebug()<<"dizzy2";
     game->fig2.dizzy_item =false;
     dizTime1 = false;
     dizTimer1->stop();
@@ -556,6 +557,7 @@ void MainWindow::DizEvent1()
 //角色2眩晕函数
 void MainWindow::DizEvent2()
 {
+    qDebug()<<"dizzy1";
     game->fig1.dizzy_item =false;
     dizTime1 = false;
     dizTimer2->stop();
@@ -564,27 +566,68 @@ void MainWindow::DizEvent2()
 //paintevent函数，在update或人物移动时调用
 void MainWindow::paintEvent(QPaintEvent *)
 {
+    //提示显示
+    if(game->hint_item){
+        int block_x = game->hint_block[0];
+        int block_y = game->hint_block[1];
+        int block_x2 = game->hint_block[2];
+        int block_y2 = game->hint_block[3];
+        if(game->GetMap()[block_x*MapCol+block_y]!=0){
+            QString Pix_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[block_x*MapCol+block_y]);
+            QPixmap pix1(Pix_name);
+            QPixmap temp(pix1.size());
+            temp.fill(Qt::transparent);
+            QPainter p1(&temp);
+            p1.setCompositionMode(QPainter::CompositionMode_Source);
+            p1.drawPixmap(0, 0, pix1);
+            p1.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+            p1.fillRect(temp.rect(), QColor(255, 0, 0, 64));
+            p1.end();
+            pix1 = temp;
+            label[block_x*MapCol+block_y] ->setPixmap(pix1);
+            label[block_x2*MapCol+block_y2] ->setPixmap(pix1);
+        }
+    }
+    else{
+        if(game->hint_block[0]!= -1){
+            int block_x = game->hint_block[0];
+            int block_y = game->hint_block[1];
+            int block_x2 = game->hint_block[2];
+            int block_y2 = game->hint_block[3];
+            QString Pix_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[block_x*MapCol+block_y]);
+            QPixmap pix1(Pix_name);
+            label[block_x*MapCol+block_y] ->setPixmap(pix1);
+            label[block_x2*MapCol+block_y2] ->setPixmap(pix1);
+        }
+    }
     //角色1模块激活
     if(game->fig1.activated_block[0]!=-1&&game->fig1.activated){
         int block_x = game->fig1.activated_block[0];
         int block_y = game->fig1.activated_block[1];
-        QString Pix_name=QString("://res\\image/%1.jfif").arg(game->Get_gamemap()[block_x*MapCol+block_y]);
-        QPixmap pix1(Pix_name);
-        QPixmap temp(pix1.size());
-        temp.fill(Qt::transparent);
-        QPainter p1(&temp);
-        p1.setCompositionMode(QPainter::CompositionMode_Source);
-        p1.drawPixmap(0, 0, pix1);
-        p1.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        p1.fillRect(temp.rect(), QColor(0, 0, 0, 140));
-        p1.end();
-        pix1 = temp;
-        label[block_x*MapCol+block_y] ->setPixmap(pix1);
+        if(game->GetMap()[block_x*MapCol+block_y]!=0){
+            QString Pix_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[block_x*MapCol+block_y]);
+            QPixmap pix1(Pix_name);
+            QPixmap temp(pix1.size());
+            temp.fill(Qt::transparent);
+            QPainter p1(&temp);
+            p1.setCompositionMode(QPainter::CompositionMode_Source);
+            p1.drawPixmap(0, 0, pix1);
+            p1.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+            p1.fillRect(temp.rect(), QColor(0, 0, 0, 140));
+            p1.end();
+            pix1 = temp;
+            label[block_x*MapCol+block_y] ->setPixmap(pix1);
+        }
+        else{
+            game->fig1.activated = false;
+            game->fig1.activated_block[0] = game->fig1.activated_block[1] = -1;
+
+        }
     }
     else if(game->fig1.activated_block[0]!=-1&&(!game->fig1.activated)){
         int block_x = game->fig1.activated_block[0];
         int block_y = game->fig1.activated_block[1];
-        QString Pix_name=QString("://res\\image/%1.jfif").arg(game->Get_gamemap()[block_x*MapCol+block_y]);
+        QString Pix_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[block_x*MapCol+block_y]);
         QPixmap pix1(Pix_name);
         label[block_x*MapCol+block_y] ->setPixmap(pix1);
     }
@@ -592,23 +635,29 @@ void MainWindow::paintEvent(QPaintEvent *)
     if(mode==2&&game->fig2.activated_block[0]!=-1&&game->fig2.activated){
         int block_x = game->fig2.activated_block[0];
         int block_y = game->fig2.activated_block[1];
-        QString Pix_name=QString("://res\\image/%1.jfif").arg(game->Get_gamemap()[block_x*MapCol+block_y]);
-        QPixmap pix1(Pix_name);
-        QPixmap temp(pix1.size());
-        temp.fill(Qt::transparent);
-        QPainter p1(&temp);
-        p1.setCompositionMode(QPainter::CompositionMode_Source);
-        p1.drawPixmap(0, 0, pix1);
-        p1.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        p1.fillRect(temp.rect(), QColor(0, 0, 0, 64));
-        p1.end();
-        pix1 = temp;
-        label[block_x*MapCol+block_y] ->setPixmap(pix1);
+        if(game->GetMap()[block_x*MapCol+block_y]!=0){
+            QString Pix_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[block_x*MapCol+block_y]);
+            QPixmap pix1(Pix_name);
+            QPixmap temp(pix1.size());
+            temp.fill(Qt::transparent);
+            QPainter p1(&temp);
+            p1.setCompositionMode(QPainter::CompositionMode_Source);
+            p1.drawPixmap(0, 0, pix1);
+            p1.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+            p1.fillRect(temp.rect(), QColor(255, 0, 0, 64));
+            p1.end();
+            pix1 = temp;
+            label[block_x*MapCol+block_y] ->setPixmap(pix1);
+        }
+        else{
+            game->fig2.activated = false;
+            game->fig2.activated_block[0] = game->fig2.activated_block[1] = -1;
+        }
     }
     else if(mode==2&&game->fig2.activated_block[0]!=-1&&(!game->fig2.activated)){
         int block_x = game->fig2.activated_block[0];
         int block_y = game->fig2.activated_block[1];
-        QString Pix_name=QString("://res\\image/%1.jfif").arg(game->Get_gamemap()[block_x*MapCol+block_y]);
+        QString Pix_name=QString("://res\\image/%1.jfif").arg(game->GetMap()[block_x*MapCol+block_y]);
         QPixmap pix1(Pix_name);
         label[block_x*MapCol+block_y] ->setPixmap(pix1);
     }
@@ -616,7 +665,7 @@ void MainWindow::paintEvent(QPaintEvent *)
     QPainter painter(this);
     QPen pen;
     pen.setWidth(5);
-    if(mode==1&&!game->fig1.blocks.empty()){
+    if(!game->fig1.blocks.empty()){
         QColor color(0,0,0);
         pen.setColor(color);
         painter.setPen(pen);
@@ -672,7 +721,7 @@ void MainWindow::on_save_clicked()
     QTextStream out(&file);
     out<<mode<<"\n";
     for(int i = 0;i<MapCol*MapRow;i++){
-        out<<game->Get_gamemap()[i]<<" ";
+        out<<game->GetMap()[i]<<" ";
     }
     out<<"\n";
     out<<remain_time<<"\n";

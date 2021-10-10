@@ -14,7 +14,7 @@ shuffle后似乎有些bug(会加载不出来图片)  ✔
 QPainter::begin: Paint device returned engine == 0, type: 2
 QPainter::setCompositionMode: Painter not active
 QPainter::end: Painter not active, aborted
-  fig2激活一个，fig1把fig2激活的消去会有bug
+  fig2激活一个，fig1把fig2激活的消去会有bug ✔
 9.测试单元问题 ✔
 10.连接有解显示 ✔
 11.游戏结束后或退出后Timer还在跑 ✔
@@ -22,3 +22,7 @@ QPainter::end: Painter not active, aborted
 13.双人模式保存bug/retry bug ✔
 14.单人模式连接线显示不出来了… ✔
 15.连接 bug 道具 ✔
+16.dizzy bug
+17.有解问题bug ✔
+有解bug*2 ✔
+18.shuffle bug  ✔

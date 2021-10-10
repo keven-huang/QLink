@@ -26,6 +26,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="save">
+       <property name="font">
+        <font>
+         <family>黑体</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>保存</string>
        </property>
@@ -33,6 +39,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="pause">
+       <property name="font">
+        <font>
+         <family>黑体</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>暂停</string>
        </property>
@@ -40,6 +52,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="exit">
+       <property name="font">
+        <font>
+         <family>黑体</family>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>exit</string>
        </property>
@@ -69,12 +87,18 @@
       <x>30</x>
       <y>550</y>
       <width>731</width>
-      <height>41</height>
+      <height>47</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="Point_2">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Points:              </string>
        </property>
@@ -95,6 +119,12 @@
      </item>
      <item>
       <widget class="QLabel" name="Point_1">
+       <property name="font">
+        <font>
+         <family>Calibri</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Points:               </string>
        </property>

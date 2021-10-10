@@ -6,6 +6,8 @@ Menu::Menu(QWidget *parent) :
     ui(new Ui::Menu)
 {
     ui->setupUi(this);
+    this->setObjectName("menu");
+    this->setStyleSheet("#menu{border-image:url(:/res/background.jfif);}");
 }
 
 Menu::~Menu()

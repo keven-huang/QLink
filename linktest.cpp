@@ -4,12 +4,21 @@ LinkTest::LinkTest()
 {
     Test_game = new QLink;
     for(int i = 1;i<MapCol*MapRow-1;i++)
-        Test_game->Get_gamemap()[i]=1;
-    Test_game->Get_gamemap()[0]=0;
-    Test_game->Get_gamemap()[MapCol-1]=0;
-    Test_game->Get_gamemap()[(MapRow-1)*MapCol]=0;
-    Test_game->Get_gamemap()[MapCol*MapRow-1]=0;
+        Test_game->GetMap()[i]=1;
+    Test_game->GetMap()[0]=0;
+    Test_game->GetMap()[MapCol-1]=0;
+    Test_game->GetMap()[(MapRow-1)*MapCol]=0;
+    Test_game->GetMap()[MapCol*MapRow-1]=0;
 }
+
+/*
+ * 0 1 1 1 1 0
+ * 1 1 1 1 1 1
+ * 1 1 1 1 1 1
+ * 1 1 1 1 1 1
+ * 1 1 1 1 1 1
+ * 0 1 1 1 1 0
+ */
 
 /*One_Link_Test共测试两种情况
  * 分别是箱子 横线连接 箱子竖线连接
@@ -63,7 +72,14 @@ void LinkTest::Three_Link_Test_border()
      QVERIFY(Test_game->Three_Line(1,MapCol-1,3,MapCol-1,Test_game->fig1)==true);
      QVERIFY(Test_game->Three_Line(0,MapCol-2,3,MapCol-1,Test_game->fig1)==true);
 }
-
+/*
+ * 0 1 1 1 1 0
+ * 1 0 0 0 0 1
+ * 1 0 1 1 0 1
+ * 1 0 1 1 0 1
+ * 1 0 0 0 0 1
+ * 0 1 1 1 1 0
+ */
 /*Three_Link_Test_inside需要Col>=6 Row>=6
  * 分别是上折线、左折线、下折线、右折线
  * 正确错误都进行测试
@@ -71,12 +87,12 @@ void LinkTest::Three_Link_Test_border()
 void LinkTest::Three_Link_Test_inside()
 {
     for(int i = 1;i<MapCol-1;i++){
-        Test_game->Get_gamemap()[MapCol+i] = 0;
-        Test_game->Get_gamemap()[(MapRow-2)*MapCol+i] = 0;
+        Test_game->GetMap()[MapCol+i] = 0;
+        Test_game->GetMap()[(MapRow-2)*MapCol+i] = 0;
     }
     for(int j = 1;j<MapRow-1;j++){
-        Test_game->Get_gamemap()[j*MapCol+1] = 0;
-        Test_game->Get_gamemap()[j*MapCol+MapCol-2] = 0;
+        Test_game->GetMap()[j*MapCol+1] = 0;
+        Test_game->GetMap()[j*MapCol+MapCol-2] = 0;
     }
     //上折线
     QVERIFY(Test_game->Three_Line(2,2,MapRow-1,MapCol-2,Test_game->fig1)==true);
@@ -113,7 +129,7 @@ void LinkTest::All_Link_Test()
         int x,y;
         x = rand()%(MapCol*MapRow);
         y = rand()%(MapCol*MapRow);
-        if(x!=y&&Test_game->Get_gamemap()[x]==Test_game->Get_gamemap()[y]){
+        if(x!=y&&Test_game->GetMap()[x]==Test_game->GetMap()[y]){
             QCOMPARE(Test_game->fig_TwoCanLink(x/MapCol,x%MapCol,y/MapCol,y%MapCol,Test_game->fig1),
                      Test_game->fig_TwoCanLink(y/MapCol,y%MapCol,x/MapCol,x%MapCol,Test_game->fig1));
             i++;
